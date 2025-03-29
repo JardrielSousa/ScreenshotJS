@@ -20,7 +20,7 @@
         /* Definir o tamanho do mapa */
         #map {
             height: 400px;
-            width: 100%;
+            width: 500px;
         }
     </style>
 </head>
@@ -99,8 +99,12 @@ btnGeneratePDF.addEventListener('click', () =>  {
                     const { jsPDF } = window.jspdf;
                     const pdf = new jsPDF();
 
+                    // Adicionar o título
+                    pdf.setFontSize(18);
+                    pdf.text('Relatório de Mapa - Fortaleza, Ceará', 10, 10); // Título na posição (70, 20)
+
                     // Adicionar a imagem ao PDF (posição e tamanho ajustados)
-                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, 180, 160); // Ajuste o tamanho conforme necessário
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 20, 120, 120); // Ajuste o tamanho conforme necessário
 
                     // Baixar o PDF
                     pdf.save("mapa.pdf");
