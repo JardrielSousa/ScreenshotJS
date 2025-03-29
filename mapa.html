@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa com Leaflet</title>
+
+    <!-- Incluir o CSS do Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Incluir o JavaScript do Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Incluir o jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Atualizar html2canvas para a versão mais recente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Definir o tamanho do mapa */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Div para o mapa -->
+    <div id="map"></div>
+    <div class="container">
+        <button id="btnPesquisar">Pesquisar</button>
+        <button id="printBtn">Imprimir em IMG</button>
+        <button id="printBtnPDF">Imprimir em PDF</button>
+    </div>
+
+    <script>
+        var centroCeara = [-5.2013, -39.6043]; // Centralizando no estado do Ceará
+        // Inicializar o mapa
+        var map = L.map('map').setView(centroCeara , 13); // Coordenadas para São Paulo, por exemplo
+
+        // Adicionar uma camada de mapa com tiles do OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Adicionar um marcador no mapa
+        L.marker([-3.71722, -38.5437]).addTo(map)
+            .bindPopup('Fortaleza - Ceará')
+            .openPopup();
+
+    let c = document.querySelector('#map'); // or document.getElementById('canvas');
+
+    let btnPesquisar = document.querySelector('#btnPesquisar');
+
+    
+let btnGenerate = document.querySelector('#printBtn');
+
+let btnGeneratePDF = document.querySelector('#printBtnPDF');
+
+btnPesquisar.addEventListener('click', () =>  {
+    
+const coordenadasFortaleza = [
+    [-3.71722, -38.5437],  // Centro de Fortaleza
+    [-3.7475, -38.5325],   // Praia de Iracema
+    [-3.7765, -38.5235]    // Avenida Beira Mar
+];
+
+coordenadasFortaleza.forEach(coord => {
+    L.marker(coord).addTo(map);
+});
+
+});
+
+btnGenerate.addEventListener('click', () =>  {
+    html2canvas(c, { logging: true, 
+                    useCORS: true 
+                }).then((canvas)=>{
+      var t = canvas.toDataURL().replace("data:image/png;base64,", "");
+      const linkSource = `data:image/png;base64,${t}`;
+        const downloadLink = document.createElement("a");
+        downloadLink.href = linkSource;
+        downloadLink.download = 'image';
+        downloadLink.click();
+    })
+});
+
+btnGeneratePDF.addEventListener('click', () =>  {
+     // Usar html2canvas para capturar a área do mapa
+     html2canvas(document.getElementById("map"), {
+                    logging: true, // Para verificar o que está acontecendo
+                    useCORS: true  // Permite capturar imagens de domínios diferentes (CORS)
+                }).then(function(canvas) {
+                    // Gerar a imagem em base64
+                    var t = canvas.toDataURL().replace("data:image/png;base64,", "");
+                    const linkSource = `data:image/png;base64,${t}`;
+
+                    // Criar o PDF com jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+
+                    // Adicionar a imagem ao PDF (posição e tamanho ajustados)
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, 180, 160); // Ajuste o tamanho conforme necessário
+
+                    // Baixar o PDF
+                    pdf.save("mapa.pdf");
+                }).catch(function(error) {
+                    console.error("Erro ao gerar o PDF:", error);
+                });
+});
+  
+    </script>
+</body>
+</html>
